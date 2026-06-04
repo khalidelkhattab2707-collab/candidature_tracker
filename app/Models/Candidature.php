@@ -6,11 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Candidature extends Model
 {
-      use softdeletes;
-      protected $fillable=[
+    use SoftDeletes;
+    use HasFactory;
+
+    protected $fillable = [
         'user_id',
         'entreprise',
         'poste',
@@ -19,12 +22,14 @@ class Candidature extends Model
         'priorite',
         'notes',
         'date_candidature',
-      ];
-      protected $casts=[
-        'date_candidature'=>'date',
-      ];
-      const status=[
-        'a_envoyer'  => 'À envoyer',
+    ];
+
+    protected $casts = [
+        'date_candidature' => 'date',
+    ];
+
+    const STATUTS = [
+        'a_envoyer'  => 'fhfhfdhdfenvoyer',
         'envoyee'    => 'Envoyée',
         'en_cours'   => 'En cours',
         'entretien'  => 'Entretien planifié',
@@ -32,19 +37,20 @@ class Candidature extends Model
         'refusee'    => 'Refusée',
         'sans_suite' => 'Sans suite',
       ];
-      const priorite=[
+    const PRIORITES = [
         'haute'   => 'Haute',
         'moyenne' => 'Moyenne',
         'basse'   => 'Basse',
       ];
-      public function user(): belongsto
-      {
-         return $this->belongsto(User::class);
-      }
-      public function entretiens():hasmany
-      {
-        return $this->hasmany(Entretiens::class);
-      }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function entretiens(): HasMany
+    {
+        return $this->hasMany(Entretien::class);
+    }
 
 
 }

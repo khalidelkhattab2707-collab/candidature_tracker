@@ -13,17 +13,17 @@ return new class extends Migration
     {
         Schema::create('candidatures', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadonDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('entreprise');
             $table->string('poste');
-            $table->enum('status',['a_envoyer', 'envoyee', 'en_cours',
+            $table->enum('statut', ['a_envoyer', 'envoyee', 'en_cours',
                          'entretien', 'acceptee', 'refusee', 'sans_suite']);
-            $table->enum('preiorite',['haute', 'moyenne', 'basse']) ;            
-            $table->date('date_candidatute');
+            $table->enum('priorite', ['haute', 'moyenne', 'basse']);
+            $table->date('date_candidature');
             $table->text('notes')->nullable();
             $table->string('url_offre')->nullable();
-         
-            $table->softdeletes();
+        
+            $table->softDeletes();
             $table->timestamps();
         });
     }

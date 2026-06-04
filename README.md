@@ -1,58 +1,228 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+CandidatureTracker
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+    Application Laravel de suivi de candidatures — Simplon x Jobintech x CDG
 
-## About Laravel
+📋 Contexte
+La recherche d'emploi pour un jeune diplômé est un défi organisationnel majeur. Entre les startups, les agences et les grandes entreprises, la multiplication des candidatures mène rapidement à une saturation d'informations.
+Actuellement gérée de manière informelle via de simples notes, cette méthode montre ses limites : oublis de relances cruciales, chevauchements d'entretiens et perte de visibilité sur l'entonnoir de recrutement.
+CandidatureTracker centralise ces flux pour transformer une gestion mentale stressante en un processus structuré et efficace.
+🎯 Objectif
+Développer une solution Laravel dédiée au suivi personnalisé des candidatures. L'outil permet d'enregistrer chaque opportunité, de planifier les étapes d'entretien et de maintenir un historique complet des interactions, assurant ainsi une réactivité optimale face aux recruteurs.
+✨ Fonctionnalités
+| US    | Fonctionnalité                                                                | Statut |
+| ----- | ----------------------------------------------------------------------------- |     
+------  |
+| US1   | Inscription / Connexion / Déconnexion (Laravel Breeze)                        | ✅      |
+| US2   | Liste de mes candidatures actives                                             | ✅      |
+| US3   | Créer une candidature (entreprise, poste, URL, statut, priorité, notes, date) | ✅      |
+| US4   | Voir le détail d'une candidature + entretiens associés                        | ✅      |
+| US5   | Modifier une candidature                                                      | ✅      |
+| US6   | Archiver une candidature (Soft Delete)                                        | ✅      |
+| US7   | Page Archives dédiée                                                          | ✅      |
+| US8   | Restaurer une candidature archivée                                            | ✅      |
+| US9   | Filtres par statut et/ou priorité                                             | ✅      |
+| US10  | Ajouter un entretien (type, date/heure, notes, résultat)                      | ✅      |
+| US11  | Modifier / Supprimer un entretien                                             | ✅      |
+| Bonus | Attacher un fichier (CV, lettre) via Storage::disk                            | ✅      |
+| Bonus | Tests Pest (Policy, validation, CRUD, archivage)                              | ✅      |
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+🛠 Stack Technique
+| Couche               | Technologie                    |
+| -------------------- | ------------------------------ |
+| **Backend**          | PHP 8.3, Laravel 11            |
+| **Frontend**         | Blade, Tailwind CSS, Alpine.js |
+| **Base de données**  | MySQL 8.0                      |
+| **Authentification** | Laravel Breeze                 |
+| **Tests**            | Pest PHP                       |
+| **Debug / Perf**     | Laravel Debugbar (zéro N+1)    |
+| **Stockage**         | Laravel Storage (disque local) |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+📐 Architecture & Contraintes Techniques
+Le projet respecte l'ensemble des contraintes imposées :
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+    ✅ Authentification via Laravel Breeze
+    ✅ Toutes les routes nommées (Route::resource() + noms explicites)
+    ✅ Toutes les routes protégées par le middleware auth
+    ✅ Validation via Form Request classes (StoreCandidatureRequest, UpdateCandidatureRequest, StoreEntretienRequest)
+    ✅ $fillable défini sur chaque modèle (Candidature, Entretien, User)
+    ✅ Autorisation via Policy (CandidaturePolicy) — un utilisateur ne peut modifier/supprimer que ses propres ressources
+    ✅ Archivage via Soft Deletes sur les candidatures (deleted_at)
+    ✅ Statuts et priorités affichés en français dans les vues
+    ✅ Zéro N+1 vérifiable en live avec Debugbar (with('entretiens') systématique)
+    ✅ @csrf sur tous les formulaires
+    ✅ @forelse pour toutes les listes avec cas vide géré (@empty)
 
-## Learning Laravel
+    Modèle de données
+    users
+├── id (PK)
+├── name
+├── email (unique)
+├── password
+└── timestamps
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+candidatures
+├── id (PK)
+├── entreprise
+├── poste
+├── url_offre (nullable)
+├── statut (en_attente, entretien, en_cours, refusee)
+├── priorite (basse, moyenne, haute)
+├── notes (nullable)
+├── date_candidature
+├── user_id (FK → users.id)
+├── deleted_at (Soft Delete)
+└── timestamps
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+entretiens
+├── id (PK)
+├── type
+├── date_heure
+├── notes_preparation (nullable)
+├── resultat (nullable)
+├── candidature_id (FK → candidatures.id)
+└── timestamps
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+🚀 Installation
+Prérequis
 
-## Agentic Development
+    PHP >= 8.3
+    Composer
+    Node.js & NPM
+    MySQL
+    Extension PHP : pdo_mysql, mbstring, openssl, json, fileinfo
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Étapes
+# 1. Cloner le repository
+git clone https://github.com/votre-username/candidature-tracker.git
+cd candidature-tracker
 
-```bash
-composer require laravel/boost --dev
+# 2. Installer les dépendances PHP
+composer install
 
-php artisan boost:install
-```
+# 3. Installer les dépendances JS
+npm install
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+# 4. Compiler les assets
+npm run build
 
-## Contributing
+# 5. Copier le fichier d'environnement
+cp .env.example .env
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# 6. Générer la clé d'application
+php artisan key:generate
 
-## Code of Conduct
+# 7. Configurer la base de données dans .env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=candidature_tracker
+DB_USERNAME=root
+DB_PASSWORD=votre_mot_de_passe
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 8. Créer la base de données
+mysql -u root -p -e "CREATE DATABASE candidature_tracker;"
 
-## Security Vulnerabilities
+# 9. Exécuter les migrations
+php artisan migrate
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 10. Créer le lien symbolique pour le stockage
+php artisan storage:link
 
-## License
+# 11. (Optionnel) Lancer les seeders
+php artisan db:seed
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# 12. Démarrer le serveur de développement
+php artisan serve
+
+🧪 Tests
+Le projet inclut des tests Pest PHP couvrant les scénarios critiques :
+# Lancer tous les tests
+php artisan test
+
+# Ou avec Pest directement
+./vendor/bin/pest
+
+Scénarios testés
+    Accès non autorisé bloqué par la Policy
+    Création d'une candidature avec données valides et invalides
+    Archivage et restauration (Soft Deletes)
+    Authentification requise sur les routes protégées
+
+
+📁 Structure du Projet
+candidature-tracker/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── CandidatureController.php
+│   │   │   └── EntretienController.php
+│   │   ├── Requests/
+│   │   │   ├── StoreCandidatureRequest.php
+│   │   │   ├── UpdateCandidatureRequest.php
+│   │   │   └── StoreEntretienRequest.php
+│   │   └── Middleware/
+│   ├── Models/
+│   │   ├── Candidature.php      # SoftDeletes, $fillable, relations
+│   │   ├── Entretien.php        # $fillable, belongsTo
+│   │   └── User.php             # HasMany candidatures
+│   └── Policies/
+│       └── CandidaturePolicy.php # Propriétaire uniquement
+├── database/
+│   └── migrations/
+│       ├── 0001_01_01_000000_create_users_table.php
+│       ├── 2026_05_18_100000_create_candidatures_table.php
+│       └── 2026_05_18_100001_create_entretiens_table.php
+├── resources/
+│   └── views/
+│       ├── candidatures/
+│       │   ├── index.blade.php    # @forelse + filtres
+│       │   ├── create.blade.php   # @csrf
+│       │   ├── edit.blade.php     # @csrf + @method('PUT')
+│       │   ├── show.blade.php     # Détail + entretiens
+│       │   └── archives.blade.php # Candidatures soft deleted
+│       ├── entretiens/
+│       │   ├── create.blade.php
+│       │   └── edit.blade.php
+│       └── layouts/
+│           └── app.blade.php
+├── routes/
+│   └── web.php                  # Routes nommées + middleware auth
+├── storage/
+│   └── app/
+│       └── candidatures/        # Fichiers attachés (CV, LM)
+├── tests/
+│   └── Feature/
+│       ├── CandidatureTest.php
+│       ├── EntretienTest.php
+│       └── AuthTest.php
+└── README.md
+
+🔐 Sécurité & Bonnes Pratiques
+
+    Autorisation : authorize() dans les Form Requests + Policies sur les controllers
+    Validation : règles centralisées dans les classes Request (pas de $request->validate() dans les controllers)
+    CSRF : protection active sur tous les formulaires Blade
+    Mass Assignment : protection via $fillable sur tous les modèles
+    Fichiers : stockage via Storage::disk('local') avec suppression automatique à la suppression de la candidature
+    N+1 : eager loading systématique (with(['entretiens'])) pour optimiser les requêtes
+
+
+🗓 Planification
+| Jour         | Objectif                                                   |
+| ------------ | ---------------------------------------------------------- |
+| **Lundi**    | MCD / MLD, Setup Laravel Breeze, Migrations, US1 (Auth)    |
+| **Mardi**    | US2-US5 (CRUD Candidatures), Form Requests, Policies       |
+| **Mercredi** | US6-US9 (Archives, Soft Deletes, Filtres), Relations       |
+| **Jeudi**    | US10-US11 (Entretiens), File Storage (Bonus), Debugbar N+1 |
+| **Vendredi** | Tests Pest, Polish UI, Préparation soutenance              |
+
+
+
+👤 Auteur
+Khalid Elkhattab — Full Stack Developer
+Formation Simplon x Jobintech x CDG — Casablanca, Maroc
+
+📄 Licence
+Ce projet est réalisé dans le cadre d'une formation professionnelle. Tous droits réservés.
+
+    "Gérez, suivez et organisez vos candidatures en toute simplicité."

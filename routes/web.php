@@ -1,58 +1,43 @@
 <?php
 
+use App\Http\Controllers\CandidatureController;
+use App\Http\Controllers\EntretienController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
- use App\Http\Controllers\CandidatureController;
- use App\Http\Controllers\EntretienController;
-
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
-Route::middleware(['auth'])->group(function(){
-// Routes pour le dashboard
-    Route
-    ::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-    // Routes pour les candidatures
-      // Liste des candidatures actives (avec filtres)
-    Route::get('/candidatures',[CandidatureController::class,'index'])->name('candidatures.index');
-    // Formulaire de création
-    Route::get('/candidatures/create',[CandidatureController::class,'create'])->name('candidatures.create');
-     // Enregistrement d'une nouvelle candidature
-    Route::post('/candidatures',[CandidatureController::class,'store'])->name('candidatures.store');
-    // Page archives (AVANT {candidature} pour éviter le conflit de routing)
-    Route::get('/candidatures/archives',[CandidatureController::class,'archives'])->name('candidatures.archives');
-    // Détail d'une candidature
-    Route::get('/candidatures/{candidature}',[CandidatureController::class,'show'])->name('candidatures.show');
-    // Formulaire de modification
-    Route::get('/candidatures/{candidature}/edit',[CandidatureController::class,'edit'])->name('candidatures.edit');
-     // Mise à jour d'une candidature
-     Route::put('/candidatures/{candidature}',[CandidatureController::class,'update'])->name('candidatures.update');
-     // Archivage d'une candidature (soft delete)
-     Route::delete('/candidatures/{candidature}',[CandidatureController::class,'destroy'])->name('candidatures.destroy');
-    // Restauration d'une candidature archivée
-    Route::post('/candidatures/{id}/restore',[CandidatureController::class,'restore'] )->name('candidatures.restore');
-   // ── ENTRETIENS ────────────────────────────────────────────
 
-    // Ajouter un entretien à une candidature
-    Route::post('/candidatures/{candidature}/entretiens', [EntretienController::class, 'store'])
-        ->name('entretiens.store');
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-    // Formulaire de modification d'entretien
-    Route::get('/entretiens/{entretien}/edit', [EntretienController::class, 'edit'])
-        ->name('entretiens.edit');
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Mise à jour d'un entretien
-    Route::put('/entretiens/{entretien}', [EntretienController::class, 'update'])
-        ->name('entretiens.update');
+    // ── CANDIDATURES ─────────────────────────────────────────
+    Route::get('/candidatures', [CandidatureController::class, 'index'])->name('candidatures.index');
+    Route::get('/candidatures/create', [CandidatureController::class, 'create'])->name('candidatures.create');
+    Route::post('/candidatures', [CandidatureController::class, 'store'])->name('candidatures.store');
+    Route::get('/candidatures/archives', [CandidatureController::class, 'archives'])->name('candidatures.archives');
+    Route::get('/candidatures/{candidature}', [CandidatureController::class, 'show'])->name('candidatures.show');
+    Route::get('/candidatures/{candidature}/edit', [CandidatureController::class, 'edit'])->name('candidatures.edit');
+    Route::put('/candidatures/{candidature}', [CandidatureController::class, 'update'])->name('candidatures.update');
+    Route::delete('/candidatures/{candidature}', [CandidatureController::class, 'destroy'])->name('candidatures.destroy');
+    Route::post('/candidatures/{id}/restore', [CandidatureController::class, 'restore'])->name('candidatures.restore');
+    Route::delete('/candidatures/{id}/force-delete', [CandidatureController::class, 'forceDestroy'])->name('candidatures.force-destroy');
+    Route::patch('/candidatures/{candidature}/statut', [CandidatureController::class, 'updateStatut'])->name('candidatures.statut');
 
-    // Suppression d'un entretien
-    Route::delete('/entretiens/{entretien}', [EntretienController::class, 'destroy'])
-        ->name('entretiens.destroy');   
+    // ── ENTRETIENS ───────────────────────────────────────────
+    Route::get('/entretiens', [EntretienController::class, 'index'])->name('entretiens.index');
+    Route::get('/entretiens/avenirs/', [EntretienController::class, 'avenirs'])->name('entretiens.avenirs');
+    Route::post('/candidatures/{candidature}/entretiens', [EntretienController::class, 'store'])->name('entretiens.store');
+    Route::get('/entretiens/{entretien}/edit', [EntretienController::class, 'edit'])->name('entretiens.edit');
+    Route::put('/entretiens/{entretien}', [EntretienController::class, 'update'])->name('entretiens.update');
+    Route::delete('/entretiens/{entretien}', [EntretienController::class, 'destroy'])->name('entretiens.destroy');
+});
 
-
-
-}) ;
-
-
+require __DIR__.'/auth.php';

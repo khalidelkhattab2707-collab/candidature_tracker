@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreEntretienRequest;
+use App\Http\Requests\UpdateEntretienRequest;
+use App\Models\Candidature;
+use App\Models\Entretien;
 use Illuminate\Http\Request;
 
 class EntretienController extends Controller
@@ -11,7 +15,14 @@ class EntretienController extends Controller
      */
     public function index()
     {
-        //
+        $entretiens = \App\Models\Entretien::whereHas('candidature', function ($q) {
+            $q->where('user_id', auth()->id());
+        })
+        ->with('candidature')
+        ->orderBy('date_heure', 'desc')
+        ->paginate(15);
+
+        return view('entretiens.index', compact('entretiens'));
     }
 
     /**
@@ -63,7 +74,7 @@ class EntretienController extends Controller
      */
     public function update(UpdateEntretienRequest $request, Entretien $entretien)
     {
-        this->authorize('update', $entretien);
+        $this->authorize('update', $entretien);
 
         $entretien->update($request->validated());
 
@@ -85,5 +96,10 @@ class EntretienController extends Controller
         return redirect()
             ->route('candidatures.show', $candidature)
             ->with('success', 'Entretien supprimé.');
+    }
+    public function avenirs(){
+    
+        $entretienAvenir=Entretien::where('date_heure',">", now())->get();
+        return view('entretienavenir',compact("entretienAvenir"));
     }
 }

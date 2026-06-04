@@ -1,11 +1,161 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+/* ── Alpine.js ── */
+[x-cloak] { display: none !important; }
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+/* ── Premium scrollbar (Linear/Stripe style) ── */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+    transition: background 0.2s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+.dark ::-webkit-scrollbar-thumb {
+    background: #334155;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* ── Selection (Raycast style) ── */
+::selection {
+    background: #6366f1;
+    color: #ffffff;
+}
+.dark ::selection {
+    background: #818cf8;
+    color: #0f172a;
+}
+
+/* ── Focus ring (Linear style) ── */
+*:focus-visible {
+    outline: none;
+    @apply ring-2 ring-indigo-500/50 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 transition-all duration-75;
+}
+
+/* ── Smooth base ── */
+html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    @apply font-sans antialiased bg-surface text-slate-900 dark:bg-surface-dark dark:text-white;
+}
+
+/* ── Subtle link underlines (Notion style) ── */
+.prose a,
+.hover-underline {
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    transition: background-size 0.25s ease-out;
+}
+.prose a:hover,
+.hover-underline:hover {
+    background-size: 100% 1px;
+}
+
+/* ── Glassmorphism utilities ── */
+@layer components {
+    .glass {
+        @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 dark:border-slate-700/30;
+    }
+    .glass-strong {
+        @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/30 dark:border-slate-700/40;
+    }
+    .glass-card {
+        @apply bg-white dark:bg-slate-800/60 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/40;
+    }
+}
+
+/* ── Subtle page entrance (Vercel style) ── */
+@layer utilities {
+    .animate-in {
+        animation: fadeSlideUp 0.4s ease-out both;
+    }
+    .animate-in-delay-1 { animation-delay: 0.05s; }
+    .animate-in-delay-2 { animation-delay: 0.1s; }
+    .animate-in-delay-3 { animation-delay: 0.15s; }
+    .animate-in-delay-4 { animation-delay: 0.2s; }
+    .animate-in-delay-5 { animation-delay: 0.25s; }
+}
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Pulse dot for notifications ── */
+@layer utilities {
+    .pulse-dot {
+        position: relative;
+    }
+    .pulse-dot::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 9999px;
+        background: #f43f5e;
+        animation: pulseRing 2s ease-out infinite;
+    }
+}
+
+@keyframes pulseRing {
+    0% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(2.5); opacity: 0; }
+    100% { transform: scale(3); opacity: 0; }
+}
+
+/* ── Skeleton shimmer (Stripe style) ── */
+@layer utilities {
+    .shimmer {
+        background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(99, 102, 241, 0.06) 50%,
+            transparent 100%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 2s ease-in-out infinite;
+    }
+    .dark .shimmer {
+        background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(129, 140, 248, 0.08) 50%,
+            transparent 100%
+        );
+        background-size: 200% 100%;
+    }
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ── Number transition (Stripe style) ── */
+@layer utilities {
+    .tabular-nums {
+        font-variant-numeric: tabular-nums;
+    }
 }

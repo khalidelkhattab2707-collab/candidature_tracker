@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('entretiens', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('candidature_id')->constrained()->deleteoncascade();
+            $table->foreignId('candidature_id')->constrained()->cascadeOnDelete();
             $table->enum('type',['telephonique', 'visio', 'presentiel', 'technique', 'rh']);
             $table->datetime('date_heure');
             $table->text('notes_preparation')->nullable();

@@ -61,6 +61,6 @@ class CandidaturePolicy
      */
     public function forceDelete(User $user, Candidature $candidature): bool
     {
-        return false;
+        return $user->id === $candidature->user_id;
     }
 }

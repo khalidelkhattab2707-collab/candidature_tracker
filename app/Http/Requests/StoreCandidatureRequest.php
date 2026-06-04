@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Candidature;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use App\model\candidature;
 
 
 class StoreCandidatureRequest extends FormRequest

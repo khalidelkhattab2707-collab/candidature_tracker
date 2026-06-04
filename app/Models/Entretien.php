@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Entretien extends Model
 {
+    use HasFactory;
     protected $fillable=[
        'candidature_id',
         'type',
@@ -17,14 +19,14 @@ class Entretien extends Model
     protected $casts=[
         'date_heure'=>'datetime',
     ];
-    const TYPE=[
+    const TYPES = [
         'telephonique' => 'Téléphonique',
         'visio'        => 'Visioconférence',
         'presentiel'   => 'Présentiel',
         'technique'    => 'Technique',
         'rh'           => 'Ressources Humaines',
     ];
-    const RESULTAT=[
+    const RESULTATS = [
         'en_attente' => 'En attente',
         'positif'    => 'Positif',
         'negatif'    => 'Négatif',

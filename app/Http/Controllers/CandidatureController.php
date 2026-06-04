@@ -16,22 +16,36 @@ class CandidatureController extends Controller
      */
     public function index(Request $request)
     {
-         $candidatures = auth()->user()
+         $sortField = match ($request->sort) {
+            'oldest' => 'created_at',
+            'company' => 'entreprise',
+            'priority' => 'priorite',
+            default => 'created_at',
+        };
+        $sortDir = $request->sort === 'oldest' ? 'asc' : 'desc';
+
+        $candidatures = auth()->user()
             ->candidatures()
-            ->with('entretiens')              // Évite le N+1 : charge les entretiens d'un coup
-            ->withCount('entretiens')         // Ajoute entretiens_count sans requête sup.
+            ->with('entretiens')
+            ->withCount('entretiens')
             ->when($request->statut, function ($query, $statut) {
                 $query->where('statut', $statut);
             })
             ->when($request->priorite, function ($query, $priorite) {
                 $query->where('priorite', $priorite);
             })
-            ->latest()
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('entreprise', 'like', "%{$search}%")
+                      ->orWhere('poste', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy($sortField, $sortDir)
             ->get();
 
         return view('candidatures.index', [
             'candidatures' => $candidatures,
-            'filtres'      => $request->only(['statut', 'priorite']),
+            'filtres'      => $request->only(['statut', 'priorite', 'sort', 'search']),
             'statuts'      => Candidature::STATUTS,
             'priorites'    => Candidature::PRIORITES,
         ]);
@@ -73,6 +87,9 @@ class CandidatureController extends Controller
 
         return view('candidatures.show', compact('candidature'));
     }
+   
+ 
+
 
     /**
      * Show the form for editing the specified resource.
@@ -127,6 +144,20 @@ class CandidatureController extends Controller
         return view('candidatures.archives', compact('candidatures'));
     }
      // ── RESTAURATION ──────────────────────────────────────────
+     // ── PIPELINE DRAG-DROP ─────────────────────────────────────
+    public function updateStatut(Request $request, Candidature $candidature)
+    {
+        $this->authorize('update', $candidature);
+
+        $data = $request->validate([
+            'statut' => ['required', 'in:' . implode(',', array_keys(Candidature::STATUTS))]
+        ]);
+
+        $candidature->update($data);
+
+        return response()->json(['success' => true]);
+    }
+
     public function restore($id)
     {
         // withTrashed() pour inclure les enregistrements soft-deleted dans la requête
@@ -139,5 +170,18 @@ class CandidatureController extends Controller
         return redirect()
             ->route('candidatures.archives')
             ->with('success', 'Candidature restaurée !');
+    }
+
+    public function forceDestroy($id)
+    {
+        $candidature = Candidature::withTrashed()->findOrFail($id);
+
+        $this->authorize('forceDelete', $candidature);
+
+        $candidature->forceDelete();
+
+        return redirect()
+            ->route('candidatures.archives')
+            ->with('success', 'Candidature supprimée définitivement.');
     }
 }
